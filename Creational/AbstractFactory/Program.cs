@@ -1,164 +1,158 @@
 ﻿using System;
 
-namespace DoFactory.GangOfFour.Abstract.RealWorld
+namespace RefactoringGuru.DesignPatterns.AbstractFactory.Conceptual
 {
-    /// <summary>
-    /// MainApp startup class for Real-World
-    /// Abstract Factory Design Pattern.
-    /// </summary>
-
-    class MainApp
+    // The Abstract Factory interface declares a set of methods that return
+    // different abstract products. These products are called a family and are
+    // related by a high-level theme or concept. Products of one family are
+    // usually able to collaborate among themselves. A family of products may
+    // have several variants, but the products of one variant are incompatible
+    // with products of another.
+    public interface IAbstractFactory
     {
-        /// <summary>
-        /// Entry point into console application.
-        /// </summary>
+        IAbstractProductA CreateProductA();
 
-        public static void Main()
+        IAbstractProductB CreateProductB();
+    }
+
+    // Concrete Factories produce a family of products that belong to a single
+    // variant. The factory guarantees that resulting products are compatible.
+    // Note that signatures of the Concrete Factory's methods return an abstract
+    // product, while inside the method a concrete product is instantiated.
+    class ConcreteFactory1 : IAbstractFactory
+    {
+        public IAbstractProductA CreateProductA()
         {
-            // Create and run the African animal world
+            return new ConcreteProductA1();
+        }
 
-            ContinentFactory africa = new AfricaFactory();
-            AnimalWorld world = new AnimalWorld(africa);
-            world.RunFoodChain();
-
-            // Create and run the American animal world
-
-            ContinentFactory america = new AmericaFactory();
-            world = new AnimalWorld(america);
-            world.RunFoodChain();
-
-            // Wait for user input
-
-            Console.ReadKey();
+        public IAbstractProductB CreateProductB()
+        {
+            return new ConcreteProductB1();
         }
     }
 
-
-    /// <summary>
-    /// The 'AbstractFactory' abstract class
-    /// </summary>
-
-    abstract class ContinentFactory
+    // Each Concrete Factory has a corresponding product variant.
+    class ConcreteFactory2 : IAbstractFactory
     {
-        public abstract Herbivore CreateHerbivore();
-        public abstract Carnivore CreateCarnivore();
-    }
-
-    /// <summary>
-    /// The 'ConcreteFactory1' class
-    /// </summary>
-
-    class AfricaFactory : ContinentFactory
-    {
-        public override Herbivore CreateHerbivore()
+        public IAbstractProductA CreateProductA()
         {
-            return new Wildebeest();
+            return new ConcreteProductA2();
         }
-        public override Carnivore CreateCarnivore()
+
+        public IAbstractProductB CreateProductB()
         {
-            return new Lion();
+            return new ConcreteProductB2();
         }
     }
 
-    /// <summary>
-    /// The 'ConcreteFactory2' class
-    /// </summary>
-
-    class AmericaFactory : ContinentFactory
+    // Each distinct product of a product family should have a base interface.
+    // All variants of the product must implement this interface.
+    public interface IAbstractProductA
     {
-        public override Herbivore CreateHerbivore()
+        string UsefulFunctionA();
+    }
+
+    // Concrete Products are created by corresponding Concrete Factories.
+    class ConcreteProductA1 : IAbstractProductA
+    {
+        public string UsefulFunctionA()
         {
-            return new Bison();
-        }
-        public override Carnivore CreateCarnivore()
-        {
-            return new Wolf();
-        }
-    }
-
-    /// <summary>
-    /// The 'AbstractProductA' abstract class
-    /// </summary>
-
-    abstract class Herbivore
-    {
-    }
-
-    /// <summary>
-    /// The 'AbstractProductB' abstract class
-    /// </summary>
-
-    abstract class Carnivore
-    {
-        public abstract void Eat(Herbivore h);
-    }
-
-    /// <summary>
-    /// The 'ProductA1' class
-    /// </summary>
-
-    class Wildebeest : Herbivore
-    {
-    }
-
-    /// <summary>
-    /// The 'ProductB1' class
-    /// </summary>
-
-    class Lion : Carnivore
-    {
-        public override void Eat(Herbivore h)
-        {
-            // Eat Wildebeest
-
-            Console.WriteLine(this.GetType().Name +
-              " eats " + h.GetType().Name);
+            return "The result of the product A1.";
         }
     }
 
-    /// <summary>
-    /// The 'ProductA2' class
-    /// </summary>
-
-    class Bison : Herbivore
+    class ConcreteProductA2 : IAbstractProductA
     {
-    }
-
-    /// <summary>
-    /// The 'ProductB2' class
-    /// </summary>
-
-    class Wolf : Carnivore
-    {
-        public override void Eat(Herbivore h)
+        public string UsefulFunctionA()
         {
-            // Eat Bison
-
-            Console.WriteLine(this.GetType().Name +
-              " eats " + h.GetType().Name);
+            return "The result of the product A2.";
         }
     }
 
-    /// <summary>
-    /// The 'Client' class 
-    /// </summary>
-
-    class AnimalWorld
+    // Here's the the base interface of another product. All products can
+    // interact with each other, but proper interaction is possible only between
+    // products of the same concrete variant.
+    public interface IAbstractProductB
     {
-        private Herbivore _herbivore;
-        private Carnivore _carnivore;
+        // Product B is able to do its own thing...
+        string UsefulFunctionB();
 
-        // Constructor
+        // ...but it also can collaborate with the ProductA.
+        //
+        // The Abstract Factory makes sure that all products it creates are of
+        // the same variant and thus, compatible.
+        string AnotherUsefulFunctionB(IAbstractProductA collaborator);
+    }
 
-        public AnimalWorld(ContinentFactory factory)
+    // Concrete Products are created by corresponding Concrete Factories.
+    class ConcreteProductB1 : IAbstractProductB
+    {
+        public string UsefulFunctionB()
         {
-            _carnivore = factory.CreateCarnivore();
-            _herbivore = factory.CreateHerbivore();
+            return "The result of the product B1.";
         }
 
-        public void RunFoodChain()
+        // The variant, Product B1, is only able to work correctly with the
+        // variant, Product A1. Nevertheless, it accepts any instance of
+        // AbstractProductA as an argument.
+        public string AnotherUsefulFunctionB(IAbstractProductA collaborator)
         {
-            _carnivore.Eat(_herbivore);
+            var result = collaborator.UsefulFunctionA();
+
+            return $"The result of the B1 collaborating with the ({result})";
+        }
+    }
+
+    class ConcreteProductB2 : IAbstractProductB
+    {
+        public string UsefulFunctionB()
+        {
+            return "The result of the product B2.";
+        }
+
+       // The variant, Product B2, is only able to work correctly with the
+       // variant, Product A2. Nevertheless, it accepts any instance of
+       // AbstractProductA as an argument.
+        public string AnotherUsefulFunctionB(IAbstractProductA collaborator)
+        {
+            var result = collaborator.UsefulFunctionA();
+
+            return $"The result of the B2 collaborating with the ({result})";
+        }
+    }
+
+    // The client code works with factories and products only through abstract
+    // types: AbstractFactory and AbstractProduct. This lets you pass any
+    // factory or product subclass to the client code without breaking it.
+    class Client
+    {
+        public void Main()
+        {
+            // The client code can work with any concrete factory class.
+            Console.WriteLine("Client: Testing client code with the first factory type...");
+            ClientMethod(new ConcreteFactory1());
+            Console.WriteLine();
+
+            Console.WriteLine("Client: Testing the same client code with the second factory type...");
+            ClientMethod(new ConcreteFactory2());
+        }
+
+        public void ClientMethod(IAbstractFactory factory)
+        {
+            var productA = factory.CreateProductA();
+            var productB = factory.CreateProductB();
+
+            Console.WriteLine(productB.UsefulFunctionB());
+            Console.WriteLine(productB.AnotherUsefulFunctionB(productA));
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            new Client().Main();
         }
     }
 }

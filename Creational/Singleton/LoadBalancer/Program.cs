@@ -44,7 +44,7 @@ namespace Singleton.RealWorld
 
     public class LoadBalancer
     {
-        static LoadBalancer instance;
+        static LoadBalancer? instance;
         List<string> servers = new List<string>();
         Random random = new Random();
 
